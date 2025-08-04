@@ -380,7 +380,7 @@
                 </div>
 
                 <button type="button" class="btn-analyze" onclick="analyzeCTG()">
-                    🔬 Phân tích CTG
+                    🔬 CTG Interpretation
                 </button>
             </form>
 
@@ -559,15 +559,15 @@
             resultDiv.innerHTML = `
                 <h3>${categoryIcon} ${categoryName}</h3>
                 <div class="result-content">
-                    <p><strong>Diễn giải:</strong> ${result.interpretation}</p>
-                    <p><strong>Tiên lượng:</strong> ${result.risk}</p>
+                    <p><strong>Interpretation</strong> ${result.interpretation}</p>
+                    <p><strong>Prognosis:</strong> ${result.risk}</p>
                     
                     <div class="management">
-                        <h4>🏥 Xử trí:</h4>
+                        <h4>Management:</h4>
                         <p>${result.management}</p>
                     </div>
                     
-                    <button class="reset-btn" onclick="resetForm()">🔄 Phân tích lại</button>
+                    <button class="reset-btn" onclick="resetForm()">🔄 Re-analyze</button>
                 </div>
             `;
             
@@ -587,4 +587,5 @@
         }
     </script>
 </body>
+
 </html>
