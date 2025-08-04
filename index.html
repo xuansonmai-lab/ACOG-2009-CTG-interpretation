@@ -437,18 +437,18 @@
 
             // Validate required fields
             if (!data.baseline || !data.variability || !data.accelerations || !data.decelerations) {
-                alert('Vui lòng điền đầy đủ tất cả các thông tin!');
+                alert('Please fill in all required information!');
                 return;
             }
 
             // Validate sub-questions if needed
             if (data.decelerations === 'variable' && !data.variableType) {
-                alert('Vui lòng chọn loại nhịp giảm bất định!');
+                alert('Please select type of variable decelerations!');
                 return;
             }
             
             if (data.decelerations === 'late' && !data.lateRecurrent) {
-                alert('Vui lòng chọn nhịp giảm muộn có tái diễn không!');
+                alert('Please specify if late decelerations are recurrent!');
                 return;
             }
 
@@ -463,7 +463,11 @@
                     category: 3,
                     interpretation: 'Sinusoidal pattern',
                     risk: 'High risk of fetal hypoxemia/acidemia',
-                    management: 'Reposition, IV fluids, scalp stimulation. Delivery if no improvement.'
+                    findings: [{
+                        finding: 'Sinusoidal pattern',
+                        cause: 'Severe fetal anemia, hypoxemia, or drug effects',
+                        management: 'Immediate delivery preparation. Consider intrauterine resuscitation: maternal repositioning, IV fluids, oxygen. Scalp stimulation contraindicated.'
+                    }]
                 };
             }
 
@@ -487,7 +491,11 @@
                         category: 3,
                         interpretation: `Absent variability + ${riskFactor}`,
                         risk: 'High risk of fetal acidemia',
-                        management: 'Reposition, IV fluids, scalp stimulation. Prepare for delivery if no improvement.'
+                        findings: [{
+                            finding: `Absent variability with ${riskFactor}`,
+                            cause: 'Severe fetal hypoxemia/acidemia, CNS depression',
+                            management: 'Immediate delivery preparation. Intrauterine resuscitation: reposition mother, IV fluids, reduce uterine activity. Consider scalp pH or lactate if available.'
+                        }]
                     };
                 }
             }
@@ -505,44 +513,113 @@
                     category: 1,
                     interpretation: 'Normal tracing',
                     risk: 'Normal acid-base status at time of observation',
-                    management: 'Monitor intermittently or continuously based on clinical risk. Review every 30 min (first stage), every 15 min (second stage).'
+                    findings: [{
+                        finding: 'Normal CTG tracing',
+                        cause: 'Normal fetal oxygenation and acid-base status',
+                        management: 'Continue routine monitoring. Intermittent auscultation acceptable in low-risk patients. Continuous monitoring every 30 min (first stage), every 15 min (second stage).'
+                    }]
                 };
             }
 
-            // Category II - all others
-            let interpretation = 'Indeterminate';
-            let management = 'Monitor closely and reassess. ';
+            // Category II - Analyze all abnormalities
+            let findings = [];
             
+            // Check baseline abnormalities
             if (data.baseline === 'high') {
-                interpretation = 'Fetal tachycardia (>160 bpm)';
-                management += 'Treat underlying cause (infection, medications). Scalp stimulation. Delivery if no improvement and acidemia suspected.';
+                findings.push({
+                    finding: 'Fetal tachycardia (>160 bpm)',
+                    cause: 'Maternal fever, infection, dehydration, medications (beta-agonists), fetal hypoxemia, maternal hyperthyroidism',
+                    management: 'Treat underlying cause: antipyretics for fever, IV fluids for dehydration, discontinue causative medications. Consider scalp stimulation. Monitor for other signs of compromise.'
+                });
             } else if (data.baseline === 'low') {
-                interpretation = 'Bradycardia (<110 bpm)';
-                management += 'Treat underlying cause (cord occlusion, hypotension). Scalp stimulation. Delivery if no improvement and acidemia suspected.';
-            } else if (data.decelerations === 'variable' && data.variableType === 'intermittent') {
-                interpretation = 'Intermittent variable decelerations (<50%)';
-                management = 'Usually benign. No intervention needed.';
-            } else if (data.decelerations === 'variable' && data.variableType === 'recurrent') {
-                interpretation = 'Recurrent variable decelerations (>50%)';
-                management = 'Umbilical cord compression. Reposition mother, consider amnioinfusion, IV fluids, reduce contractions. Scalp stimulation. Delivery if no improvement and acidemia suspected.';
-            } else if (data.decelerations === 'late' && data.lateRecurrent === 'yes') {
-                interpretation = 'Recurrent late decelerations';
-                management = 'Uteroplacental insufficiency. Reposition mother, IV fluids, reduce contractions. Scalp stimulation. Delivery if no improvement.';
-            } else if (data.decelerations === 'prolonged') {
-                interpretation = 'Prolonged decelerations';
-                management = 'Treat based on underlying cause and associated features. Reposition, IV fluids, scalp stimulation.';
+                findings.push({
+                    finding: 'Fetal bradycardia (<110 bpm)',
+                    cause: 'Cord compression, maternal hypotension, uterine hyperactivity, fetal heart block, severe fetal hypoxemia',
+                    management: 'Maternal repositioning, IV fluids, reduce uterine activity. Scalp stimulation. Consider delivery if persistent and other abnormalities present.'
+                });
+            }
+
+            // Check variability abnormalities
+            if (data.variability === 'absent') {
+                findings.push({
+                    finding: 'Absent variability',
+                    cause: 'Fetal sleep (usually <40 min), medications (narcotics, magnesium), fetal hypoxemia, congenital anomalies',
+                    management: 'Scalp stimulation to exclude fetal sleep. Consider reducing medications. Monitor closely for other signs of compromise.'
+                });
             } else if (data.variability === 'minimal') {
-                interpretation = 'Minimal variability';
-                management = 'May indicate fetal sleep, medications, or acidemia. Reposition, IV fluids, reduce contractions. Scalp stimulation. Delivery if no improvement and no accelerations + suspected acidemia.';
-            } else {
-                management = 'Continue monitoring and assess for other clinical factors.';
+                findings.push({
+                    finding: 'Minimal variability (<5 bpm)',
+                    cause: 'Fetal sleep, medications (narcotics, magnesium), early fetal hypoxemia, prematurity',
+                    management: 'Scalp stimulation, reposition mother, IV fluids. Consider reducing medications. Monitor for accelerations and other signs.'
+                });
+            } else if (data.variability === 'marked') {
+                findings.push({
+                    finding: 'Marked variability (>25 bpm)',
+                    cause: 'Mild fetal hypoxemia, cord compression, rapid fetal movement',
+                    management: 'Usually benign if isolated. Monitor for development of other abnormalities. Consider scalp stimulation.'
+                });
+            }
+
+            // Check acceleration abnormalities
+            if (data.accelerations === 'absent') {
+                findings.push({
+                    finding: 'Absent accelerations',
+                    cause: 'Fetal sleep, medications, fetal hypoxemia, prematurity (<32 weeks)',
+                    management: 'Scalp stimulation, acoustic stimulation. If no response after stimulation, consider fetal compromise.'
+                });
+            }
+
+            // Check deceleration abnormalities
+            if (data.decelerations === 'variable') {
+                if (data.variableType === 'intermittent') {
+                    findings.push({
+                        finding: 'Intermittent variable decelerations (<50%)',
+                        cause: 'Mild umbilical cord compression, oligohydramnios',
+                        management: 'Usually benign. Maternal repositioning, consider amnioinfusion if severe oligohydramnios.'
+                    });
+                } else if (data.variableType === 'recurrent') {
+                    findings.push({
+                        finding: 'Recurrent variable decelerations (≥50%)',
+                        cause: 'Significant umbilical cord compression, oligohydramnios, cord prolapse',
+                        management: 'Maternal repositioning (left lateral, knee-chest), IV fluids, consider amnioinfusion. Scalp stimulation. Prepare for delivery if severe or persistent.'
+                    });
+                }
+            } else if (data.decelerations === 'late') {
+                if (data.lateRecurrent === 'yes') {
+                    findings.push({
+                        finding: 'Recurrent late decelerations',
+                        cause: 'Uteroplacental insufficiency, maternal hypotension, uterine hyperactivity, placental abruption',
+                        management: 'Maternal repositioning, IV fluids, oxygen, reduce uterine activity. Treat hypotension. Consider delivery if persistent despite interventions.'
+                    });
+                } else {
+                    findings.push({
+                        finding: 'Non-recurrent late decelerations',
+                        cause: 'Transient uteroplacental insufficiency, maternal position, contractions',
+                        management: 'Maternal repositioning, IV fluids. Monitor closely for recurrence.'
+                    });
+                }
+            } else if (data.decelerations === 'prolonged') {
+                findings.push({
+                    finding: 'Prolonged decelerations',
+                    cause: 'Cord compression, maternal hypotension, uterine hyperactivity, placental abruption, uterine rupture',
+                    management: 'Immediate maternal repositioning, IV fluids, oxygen, discontinue oxytocin. Prepare for emergency delivery if >10 minutes or recurrent.'
+                });
+            }
+
+            // If no specific abnormalities found but it's Category II
+            if (findings.length === 0) {
+                findings.push({
+                    finding: 'Indeterminate tracing',
+                    cause: 'Cannot determine fetal acid-base status from current pattern',
+                    management: 'Continue close monitoring. Reassess in 30 minutes. Consider intrauterine resuscitation measures if indicated.'
+                });
             }
 
             return {
                 category: 2,
-                interpretation: interpretation,
-                risk: 'Indeterminate - cannot determine fetal acid-base status',
-                management: management
+                interpretation: findings.map(f => f.finding).join(' + '),
+                risk: 'Indeterminate - cannot determine fetal acid-base status reliably',
+                findings: findings
             };
         }
 
@@ -559,7 +636,7 @@
             resultDiv.innerHTML = `
                 <h3>${categoryIcon} ${categoryName}</h3>
                 <div class="result-content">
-                    <p><strong>Interpretation</strong> ${result.interpretation}</p>
+                    <p><strong>Interpretation:</strong> ${result.interpretation}</p>
                     <p><strong>Prognosis:</strong> ${result.risk}</p>
                     
                     <div class="management">
@@ -587,5 +664,4 @@
         }
     </script>
 </body>
-
 </html>
