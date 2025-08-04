@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CTG Classification - ACOG/NICHD 2009</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50, #3498db);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        .form-container {
+            padding: 40px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #2c3e50;
+            font-size: 1.1rem;
+        }
+
+        .radio-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .radio-option {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .radio-option:hover {
+            border-color: #3498db;
+            background-color: #f8f9ff;
+        }
+
+        .radio-option.selected {
+            border-color: #3498db;
+            background-color: #e3f2fd;
+        }
+
+        .radio-option input[type="radio"] {
+            margin-right: 12px;
+            transform: scale(1.2);
+        }
+
+        .sub-question {
+            margin-left: 30px;
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-left: 4px solid #3498db;
+            border-radius: 5px;
+            display: none;
+        }
+
+        .sub-question.show {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .btn-analyze {
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .btn-analyze:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(46, 204, 113, 0.3);
+        }
+
+        .btn-analyze:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .result {
+            margin-top: 30px;
+            padding: 25px;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .result.show {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result h3 {
+            margin-bottom: 15px;
+            font-size: 1.4rem;
+        }
+
+        .result-content {
+            line-height: 1.6;
+        }
+
+        .category-1 {
+            background: linear-gradient(135deg, #d4edda, #c3e6cb);
+            border-left: 5px solid #28a745;
+        }
+
+        .category-1 h3 {
+            color: #155724;
+        }
+
+        .category-2 {
+            background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+            border-left: 5px solid #ffc107;
+        }
+
+        .category-2 h3 {
+            color: #856404;
+        }
+
+        .category-3 {
+            background: linear-gradient(135deg, #f8d7da, #f5c6cb);
+            border-left: 5px solid #dc3545;
+        }
+
+        .category-3 h3 {
+            color: #721c24;
+        }
+
+        .management {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #6c757d;
+        }
+
+        .management h4 {
+            color: #495057;
+            margin-bottom: 10px;
+        }
+
+        .reset-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: background 0.3s ease;
+        }
+
+        .reset-btn:hover {
+            background: #5a6268;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 10px;
+            }
+            
+            .form-container {
+                padding: 20px;
+            }
+            
+            .header {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🫀 CTG Classification - ACOG/NICHD 2009</h1>
+            <p>This educational tool was developed by Dr. Mai Xuan Son for academic reference purposes only. It is not intended for clinical decision-making or patient care.</p>
+            <p style="margin-top: 10px; font-size: 0.9rem;">
+                <strong>Reference:</strong> 
+                <a href="https://www.uptodate.com/contents/intrapartum-category-i-ii-and-iii-fetal-heart-rate-tracings-management" 
+                   target="_blank" 
+                   style="color: #87CEEB; text-decoration: underline;">
+                   UpToDate - Intrapartum Category I, II, and III FHR Tracings Management
+                </a>
+            </p>
+        </div>
+        
+        <div class="form-container">
+            <form id="ctgForm">
+                <!-- Baseline FHR -->
+                <div class="form-group">
+                    <label>1. Baseline Fetal Heart Rate:</label>
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" name="baseline" value="low" id="baseline_low">
+                            <label for="baseline_low">< 110 bpm (Bradycardia)</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" name="baseline" value="normal" id="baseline_normal">
+                            <label for="baseline_normal">110-160 bpm (Normal)</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" name="baseline" value="high" id="baseline_high">
+                            <label for="baseline_high">> 160 bpm (Tachycardia)</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Baseline Variability -->
+                <div class="form-group">
+                    <label>2. Baseline Variability:</label>
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" name="variability" value="absent" id="var_absent">
+                            <label for="var_absent">Absent</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" name="variability" value="minimal" id="var_minimal">
+                            <label for="var_minimal">< 5 bpm (Minimal)</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" name="variability" value="moderate" id="var_moderate">
+                            <label for="var_moderate">6-25 bpm (Moderate - Normal)</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" name="variability" value="marked" id="var_marked">
+                            <label for="var_marked">> 25 bpm (Marked)</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" name="variability" value="sinusoidal" id="var_sinusoidal">
+                            <label for="var_sinusoidal">Sinusoidal pattern</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Accelerations -->
+                <div class="form-group">
+                    <label>3. Accelerations:</label>
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" name="accelerations" value="present" id="acc_present">
+                            <label for="acc_present">Present</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" name="accelerations" value="absent" id="acc_absent">
+                            <label for="acc_absent">Absent</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Decelerations -->
+                <div class="form-group">
+                    <label>4. Decelerations:</label>
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" name="decelerations" value="early" id="decel_early">
+                            <label for="decel_early">Early</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" name="decelerations" value="variable" id="decel_variable">
+                            <label for="decel_variable">Variable</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" name="decelerations" value="late" id="decel_late">
+                            <label for="decel_late">Late</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" name="decelerations" value="prolonged" id="decel_prolonged">
+                            <label for="decel_prolonged">Prolonged</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" name="decelerations" value="none" id="decel_none">
+                            <label for="decel_none">None</label>
+                        </div>
+                    </div>
+
+                    <!-- Sub-question for variable decelerations -->
+                    <div class="sub-question" id="variableSubQ">
+                        <label><strong>Type of variable decelerations:</strong></label>
+                        <div class="radio-group">
+                            <div class="radio-option">
+                                <input type="radio" name="variableType" value="intermittent" id="var_intermittent">
+                                <label for="var_intermittent">Intermittent (<50% of contractions)</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" name="variableType" value="recurrent" id="var_recurrent">
+                                <label for="var_recurrent">Recurrent (>50% of contractions)</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sub-question for late decelerations -->
+                    <div class="sub-question" id="lateSubQ">
+                        <label><strong>Are late decelerations recurrent?</strong></label>
+                        <div class="radio-group">
+                            <div class="radio-option">
+                                <input type="radio" name="lateRecurrent" value="yes" id="late_recurrent_yes">
+                                <label for="late_recurrent_yes">Yes (Recurrent late decelerations)</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" name="lateRecurrent" value="no" id="late_recurrent_no">
+                                <label for="late_recurrent_no">No</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="button" class="btn-analyze" onclick="analyzeCTG()">
+                    🔬 Phân tích CTG
+                </button>
+            </form>
+
+            <div id="result" class="result">
+                <!-- Results will be displayed here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Show/hide sub-questions based on deceleration type
+        document.querySelectorAll('input[name="decelerations"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                const variableSubQ = document.getElementById('variableSubQ');
+                const lateSubQ = document.getElementById('lateSubQ');
+                
+                // Hide all sub-questions first
+                variableSubQ.classList.remove('show');
+                lateSubQ.classList.remove('show');
+                
+                // Clear sub-question selections
+                document.querySelectorAll('input[name="variableType"]').forEach(r => r.checked = false);
+                document.querySelectorAll('input[name="lateRecurrent"]').forEach(r => r.checked = false);
+                
+                // Show relevant sub-question
+                if (this.value === 'variable') {
+                    variableSubQ.classList.add('show');
+                } else if (this.value === 'late') {
+                    lateSubQ.classList.add('show');
+                }
+            });
+        });
+
+        // Add selected class to radio options
+        document.querySelectorAll('input[type="radio"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                // Remove selected class from siblings
+                const name = this.name;
+                document.querySelectorAll(`input[name="${name}"]`).forEach(r => {
+                    r.closest('.radio-option').classList.remove('selected');
+                });
+                // Add selected class to current option
+                this.closest('.radio-option').classList.add('selected');
+            });
+        });
+
+        function analyzeCTG() {
+            const formData = new FormData(document.getElementById('ctgForm'));
+            const data = {};
+            
+            for (let [key, value] of formData.entries()) {
+                data[key] = value;
+            }
+
+            // Validate required fields
+            if (!data.baseline || !data.variability || !data.accelerations || !data.decelerations) {
+                alert('Vui lòng điền đầy đủ tất cả các thông tin!');
+                return;
+            }
+
+            // Validate sub-questions if needed
+            if (data.decelerations === 'variable' && !data.variableType) {
+                alert('Vui lòng chọn loại nhịp giảm bất định!');
+                return;
+            }
+            
+            if (data.decelerations === 'late' && !data.lateRecurrent) {
+                alert('Vui lòng chọn nhịp giảm muộn có tái diễn không!');
+                return;
+            }
+
+            const result = classifyCTG(data);
+            displayResult(result);
+        }
+
+        function classifyCTG(data) {
+            // Category III conditions
+            if (data.variability === 'sinusoidal') {
+                return {
+                    category: 3,
+                    interpretation: 'Sinusoidal pattern',
+                    risk: 'High risk of fetal hypoxemia/acidemia',
+                    management: 'Reposition, IV fluids, scalp stimulation. Delivery if no improvement.'
+                };
+            }
+
+            if (data.variability === 'absent') {
+                let hasRiskFactor = false;
+                let riskFactor = '';
+                
+                if (data.decelerations === 'late' && data.lateRecurrent === 'yes') {
+                    hasRiskFactor = true;
+                    riskFactor = 'recurrent late decelerations';
+                } else if (data.decelerations === 'variable' && data.variableType === 'recurrent') {
+                    hasRiskFactor = true;
+                    riskFactor = 'recurrent variable decelerations';
+                } else if (data.baseline === 'low') {
+                    hasRiskFactor = true;
+                    riskFactor = 'bradycardia';
+                }
+                
+                if (hasRiskFactor) {
+                    return {
+                        category: 3,
+                        interpretation: `Absent variability + ${riskFactor}`,
+                        risk: 'High risk of fetal acidemia',
+                        management: 'Reposition, IV fluids, scalp stimulation. Prepare for delivery if no improvement.'
+                    };
+                }
+            }
+
+            // Category I conditions
+            const isCategoryI = 
+                data.baseline === 'normal' &&
+                data.variability === 'moderate' &&
+                (data.decelerations === 'none' || data.decelerations === 'early') &&
+                !(data.decelerations === 'late' && data.lateRecurrent === 'yes') &&
+                !(data.decelerations === 'variable' && data.variableType === 'recurrent');
+
+            if (isCategoryI) {
+                return {
+                    category: 1,
+                    interpretation: 'Normal tracing',
+                    risk: 'Normal acid-base status at time of observation',
+                    management: 'Monitor intermittently or continuously based on clinical risk. Review every 30 min (first stage), every 15 min (second stage).'
+                };
+            }
+
+            // Category II - all others
+            let interpretation = 'Indeterminate';
+            let management = 'Monitor closely and reassess. ';
+            
+            if (data.baseline === 'high') {
+                interpretation = 'Fetal tachycardia (>160 bpm)';
+                management += 'Treat underlying cause (infection, medications). Scalp stimulation. Delivery if no improvement and acidemia suspected.';
+            } else if (data.baseline === 'low') {
+                interpretation = 'Bradycardia (<110 bpm)';
+                management += 'Treat underlying cause (cord occlusion, hypotension). Scalp stimulation. Delivery if no improvement and acidemia suspected.';
+            } else if (data.decelerations === 'variable' && data.variableType === 'intermittent') {
+                interpretation = 'Intermittent variable decelerations (<50%)';
+                management = 'Usually benign. No intervention needed.';
+            } else if (data.decelerations === 'variable' && data.variableType === 'recurrent') {
+                interpretation = 'Recurrent variable decelerations (>50%)';
+                management = 'Umbilical cord compression. Reposition mother, consider amnioinfusion, IV fluids, reduce contractions. Scalp stimulation. Delivery if no improvement and acidemia suspected.';
+            } else if (data.decelerations === 'late' && data.lateRecurrent === 'yes') {
+                interpretation = 'Recurrent late decelerations';
+                management = 'Uteroplacental insufficiency. Reposition mother, IV fluids, reduce contractions. Scalp stimulation. Delivery if no improvement.';
+            } else if (data.decelerations === 'prolonged') {
+                interpretation = 'Prolonged decelerations';
+                management = 'Treat based on underlying cause and associated features. Reposition, IV fluids, scalp stimulation.';
+            } else if (data.variability === 'minimal') {
+                interpretation = 'Minimal variability';
+                management = 'May indicate fetal sleep, medications, or acidemia. Reposition, IV fluids, reduce contractions. Scalp stimulation. Delivery if no improvement and no accelerations + suspected acidemia.';
+            } else {
+                management = 'Continue monitoring and assess for other clinical factors.';
+            }
+
+            return {
+                category: 2,
+                interpretation: interpretation,
+                risk: 'Indeterminate - cannot determine fetal acid-base status',
+                management: management
+            };
+        }
+
+        function displayResult(result) {
+            const resultDiv = document.getElementById('result');
+            const categoryClass = `category-${result.category}`;
+            const categoryName = result.category === 1 ? 'Category I - Normal' : 
+                                result.category === 2 ? 'Category II - Indeterminate' : 
+                                'Category III - Abnormal';
+            
+            const categoryIcon = result.category === 1 ? '✅' : 
+                                result.category === 2 ? '❓' : '❌';
+
+            resultDiv.innerHTML = `
+                <h3>${categoryIcon} ${categoryName}</h3>
+                <div class="result-content">
+                    <p><strong>Diễn giải:</strong> ${result.interpretation}</p>
+                    <p><strong>Tiên lượng:</strong> ${result.risk}</p>
+                    
+                    <div class="management">
+                        <h4>🏥 Xử trí:</h4>
+                        <p>${result.management}</p>
+                    </div>
+                    
+                    <button class="reset-btn" onclick="resetForm()">🔄 Phân tích lại</button>
+                </div>
+            `;
+            
+            resultDiv.className = `result ${categoryClass} show`;
+            resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function resetForm() {
+            document.getElementById('ctgForm').reset();
+            document.querySelectorAll('.radio-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            document.querySelectorAll('.sub-question').forEach(subQ => {
+                subQ.classList.remove('show');
+            });
+            document.getElementById('result').classList.remove('show');
+        }
+    </script>
+</body>
+</html>
